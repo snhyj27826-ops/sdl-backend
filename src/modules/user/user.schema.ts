@@ -15,6 +15,15 @@ export class User {
   password: string;
 
   @Prop({})
+  firstName: string;
+
+  @Prop({})
+  lastName: string;
+
+  @Prop({})
+  nationality: string;
+
+  @Prop({})
   name: string;
 
   @Prop({ default: 'user' })

@@ -6,6 +6,9 @@ declare class LoginDto {
 declare class RegisterDto {
     email: string;
     password: string;
+    firstName?: string;
+    lastName?: string;
+    nationality?: string;
 }
 export declare class AuthController {
     private readonly authService;

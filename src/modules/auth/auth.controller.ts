@@ -17,6 +17,9 @@ class LoginDto {
 class RegisterDto {
   email: string;
   password: string;
+  firstName?: string;
+  lastName?: string;
+  nationality?: string;
 }
 
 @Controller('auth')
@@ -27,7 +30,7 @@ export class AuthController {
   async register(
     @Body() registerDto: RegisterDto,
   ): Promise<{ accessToken: string }> {
-    return this.authService.register(registerDto.email, registerDto.password);
+    return this.authService.register(registerDto);
   }
 
   @Post('login')

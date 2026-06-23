@@ -25,7 +25,7 @@ let AuthController = class AuthController {
         this.authService = authService;
     }
     async register(registerDto) {
-        return this.authService.register(registerDto.email, registerDto.password);
+        return this.authService.register(registerDto);
     }
     async login(loginDto) {
         const user = await this.authService.validateUser(loginDto.email, loginDto.password);

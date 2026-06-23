@@ -9,7 +9,7 @@ export declare class AuthService {
     login(user: any): Promise<{
         accessToken: string;
     }>;
-    register(email: string, password: string): Promise<{
+    register(registerDto: any): Promise<{
         accessToken: string;
     }>;
 }

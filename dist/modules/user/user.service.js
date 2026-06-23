@@ -25,9 +25,14 @@ let UserService = class UserService {
     async findOne(email) {
         return this.userModel.findOne({ email }).exec();
     }
-    async create(email, password) {
+    async create(userData) {
+        const { email, password, ...rest } = userData;
         const hashPassword = await bcrypt.hash(password, 10);
-        const newUser = new this.userModel({ email, password: hashPassword });
+        const newUser = new this.userModel({
+            email,
+            password: hashPassword,
+            ...rest,
+        });
         return newUser.save();
     }
     async findAll() {

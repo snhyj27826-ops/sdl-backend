@@ -28,6 +28,18 @@ __decorate([
 __decorate([
     (0, mongoose_1.Prop)({}),
     __metadata("design:type", String)
+], User.prototype, "firstName", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({}),
+    __metadata("design:type", String)
+], User.prototype, "lastName", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({}),
+    __metadata("design:type", String)
+], User.prototype, "nationality", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({}),
+    __metadata("design:type", String)
 ], User.prototype, "name", void 0);
 __decorate([
     (0, mongoose_1.Prop)({ default: 'user' }),

@@ -41,8 +41,12 @@ let AuthService = class AuthService {
             accessToken: this.jwtService.sign(payload),
         };
     }
-    async register(email, password) {
-        const user = await this.userService.create(email, password);
+    async register(registerDto) {
+        const existingUser = await this.userService.findOne(registerDto.email);
+        if (existingUser) {
+            throw new common_1.ConflictException('Email already exists');
+        }
+        const user = await this.userService.create(registerDto);
         return this.login(user);
     }
 };
