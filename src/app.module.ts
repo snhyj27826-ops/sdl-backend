@@ -6,6 +6,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { ContentModule } from './modules/content/content.module';
+import { ContentAdminModule } from './modules/content-admin/content-admin.module';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
     }),
     AuthModule,
     UserModule,
+    ContentModule,
+    ContentAdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

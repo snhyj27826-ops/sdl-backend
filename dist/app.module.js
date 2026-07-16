@@ -15,6 +15,8 @@ const auth_module_1 = require("./modules/auth/auth.module");
 const user_module_1 = require("./modules/user/user.module");
 const mongoose_1 = require("@nestjs/mongoose");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
+const content_module_1 = require("./modules/content/content.module");
+const content_admin_module_1 = require("./modules/content-admin/content-admin.module");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer.apply(logger_middleware_1.LoggerMiddleware).forRoutes({
@@ -40,6 +42,8 @@ exports.AppModule = AppModule = __decorate([
             }),
             auth_module_1.AuthModule,
             user_module_1.UserModule,
+            content_module_1.ContentModule,
+            content_admin_module_1.ContentAdminModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
