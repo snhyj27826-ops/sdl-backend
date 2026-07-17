@@ -9,7 +9,12 @@ export class TimelineController {
   findAll(
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '3',
+    @Query('locale') locale: string = 'en',
   ) {
-    return this.timelineService.findPublished(parseInt(page, 10), parseInt(limit, 10));
+    return this.timelineService.findPublished(
+      Number.parseInt(page, 10),
+      Number.parseInt(limit, 10),
+      locale,
+    );
   }
 }

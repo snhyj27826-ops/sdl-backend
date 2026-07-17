@@ -1,21 +1,70 @@
-import { IsBoolean, IsInt, IsOptional, IsString, MaxLength, Min } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsBoolean,
+  IsInt,
+  IsOptional,
+  IsString,
+  MaxLength,
+  Min,
+  ValidateNested,
+} from 'class-validator';
+
+class LocalizedTitleDto {
+  @IsString()
+  @MaxLength(120)
+  en: string;
+
+  @IsString()
+  @MaxLength(120)
+  sr: string;
+
+  @IsString()
+  @MaxLength(120)
+  mk: string;
+}
+
+class LocalizedSubtitleDto {
+  @IsString()
+  @MaxLength(200)
+  en: string;
+
+  @IsString()
+  @MaxLength(200)
+  sr: string;
+
+  @IsString()
+  @MaxLength(200)
+  mk: string;
+}
+
+class LocalizedDescriptionDto {
+  @IsString()
+  en: string;
+
+  @IsString()
+  sr: string;
+
+  @IsString()
+  mk: string;
+}
 
 export class CreateTimelineEventDto {
   @IsInt()
   @Min(1900)
   year: number;
 
-  @IsString()
-  @MaxLength(120)
-  title: string;
+  @ValidateNested()
+  @Type(() => LocalizedTitleDto)
+  title: LocalizedTitleDto;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(200)
-  subtitle?: string;
+  @ValidateNested()
+  @Type(() => LocalizedSubtitleDto)
+  subtitle?: LocalizedSubtitleDto;
 
-  @IsString()
-  description: string;
+  @ValidateNested()
+  @Type(() => LocalizedDescriptionDto)
+  description: LocalizedDescriptionDto;
 
   @IsOptional()
   @IsString()
