@@ -2,13 +2,13 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateTimelineEventDto } from './dto/create-timeline-event.dto';
-import {
-  isTimelineLocale,
-  LocalizedTextValue,
-  TimelineLocale,
-  TIMELINE_LOCALES,
-} from './timeline-localization';
 import { TimelineEvent, TimelineEventDocument } from './timeline.schema';
+import {
+  isLocale,
+  Locale,
+  LOCALES,
+  LocalizedTextValue,
+} from '../../../common/localization/localization';
 
 type LocalizedInput = string | LocalizedTextValue;
 type TimelineEventRecord = {
@@ -24,7 +24,11 @@ export class TimelineService {
     private readonly timelineEventModel: Model<TimelineEventDocument>,
   ) {}
 
-  async findPublished(page: number = 1, limit: number = 3, locale: string = 'en') {
+  async findPublished(
+    page: number = 1,
+    limit: number = 3,
+    locale: string = 'en',
+  ) {
     const resolvedLocale = this.resolveLocale(locale);
     const resolvedPage = Number.isInteger(page) && page > 0 ? page : 1;
     const resolvedLimit = Number.isInteger(limit) && limit > 0 ? limit : 3;
@@ -44,7 +48,10 @@ export class TimelineService {
     const hasMore = skip + resolvedLimit < total;
 
     const localizedData = data.map((event) =>
-      this.mapPublishedEvent(event as unknown as TimelineEventRecord, resolvedLocale),
+      this.mapPublishedEvent(
+        event as unknown as TimelineEventRecord,
+        resolvedLocale,
+      ),
     );
 
     return { data: localizedData, total, hasMore };
@@ -57,11 +64,15 @@ export class TimelineService {
       .lean()
       .exec();
 
-    return data.map((event) => this.mapAdminEvent(event as unknown as TimelineEventRecord));
+    return data.map((event) =>
+      this.mapAdminEvent(event as unknown as TimelineEventRecord),
+    );
   }
 
   async create(createDto: CreateTimelineEventDto) {
-    const created = await this.timelineEventModel.create(this.normalizePayload(createDto, false));
+    const created = await this.timelineEventModel.create(
+      this.normalizePayload(createDto, false),
+    );
     return this.mapAdminEvent(created.toObject() as TimelineEventRecord);
   }
 
@@ -73,24 +84,26 @@ export class TimelineService {
       .lean()
       .exec();
 
-    return updated ? this.mapAdminEvent(updated as unknown as TimelineEventRecord) : null;
+    return updated
+      ? this.mapAdminEvent(updated as unknown as TimelineEventRecord)
+      : null;
   }
 
   remove(id: string) {
     return this.timelineEventModel.findByIdAndDelete(id).lean().exec();
   }
 
-  private resolveLocale(locale: string): TimelineLocale {
-    if (!isTimelineLocale(locale)) {
+  private resolveLocale(locale: string): Locale {
+    if (!isLocale(locale)) {
       throw new BadRequestException(
-        `Unsupported locale "${locale}". Supported locales: ${TIMELINE_LOCALES.join(', ')}`,
+        `Unsupported locale "${locale}". Supported locales: ${LOCALES.join(', ')}`,
       );
     }
 
     return locale;
   }
 
-  private mapPublishedEvent(event: TimelineEventRecord, locale: TimelineLocale) {
+  private mapPublishedEvent(event: TimelineEventRecord, locale: Locale) {
     const localizedEvent = this.mapAdminEvent(event);
 
     return {
@@ -113,7 +126,10 @@ export class TimelineService {
     };
   }
 
-  private normalizePayload(payload: Partial<CreateTimelineEventDto>, isPartial: boolean) {
+  private normalizePayload(
+    payload: Partial<CreateTimelineEventDto>,
+    isPartial: boolean,
+  ) {
     const normalized = { ...payload } as Partial<CreateTimelineEventDto> & {
       title?: LocalizedTextValue;
       subtitle?: LocalizedTextValue;
@@ -121,13 +137,21 @@ export class TimelineService {
     };
 
     if (payload.title !== undefined || !isPartial) {
-      normalized.title = this.toLocalizedInput(payload.title as LocalizedInput, 'title', !isPartial);
+      normalized.title = this.toLocalizedInput(
+        payload.title as LocalizedInput,
+        'title',
+        !isPartial,
+      );
     } else {
       delete normalized.title;
     }
 
     if (payload.subtitle !== undefined) {
-      normalized.subtitle = this.toLocalizedInput(payload.subtitle as LocalizedInput, 'subtitle', false);
+      normalized.subtitle = this.toLocalizedInput(
+        payload.subtitle as LocalizedInput,
+        'subtitle',
+        false,
+      );
     } else {
       delete normalized.subtitle;
     }
@@ -152,16 +176,21 @@ export class TimelineService {
   ) {
     if (value === undefined) {
       if (isRequired) {
-        throw new BadRequestException(`"${field}" is required and must include en, sr and mk.`);
+        throw new BadRequestException(
+          `"${field}" is required and must include en, sr and mk.`,
+        );
       }
 
       return undefined;
     }
 
-    const localized = typeof value === 'string' ? this.duplicateAcrossLocales(value) : value;
+    const localized =
+      typeof value === 'string' ? this.duplicateAcrossLocales(value) : value;
 
     if (!this.isLocalizedTextValue(localized)) {
-      throw new BadRequestException(`"${field}" must include non-empty en, sr and mk strings.`);
+      throw new BadRequestException(
+        `"${field}" must include non-empty en, sr and mk strings.`,
+      );
     }
 
     this.validateLocalizedLength(field, localized);
@@ -176,16 +205,21 @@ export class TimelineService {
   ): LocalizedTextValue | undefined {
     if (value === undefined) {
       if (isRequired) {
-        throw new BadRequestException(`"${field}" is missing from timeline event data.`);
+        throw new BadRequestException(
+          `"${field}" is missing from timeline event data.`,
+        );
       }
 
       return undefined;
     }
 
-    const localized = typeof value === 'string' ? this.duplicateAcrossLocales(value) : value;
+    const localized =
+      typeof value === 'string' ? this.duplicateAcrossLocales(value) : value;
 
     if (!this.isLocalizedTextValue(localized)) {
-      throw new BadRequestException(`"${field}" must include en, sr and mk strings.`);
+      throw new BadRequestException(
+        `"${field}" must include en, sr and mk strings.`,
+      );
     }
 
     return localized;
@@ -203,13 +237,14 @@ export class TimelineService {
     field: 'title' | 'subtitle' | 'description',
     value: LocalizedTextValue,
   ) {
-    const maxLength = field === 'title' ? 120 : field === 'subtitle' ? 200 : undefined;
+    const maxLength =
+      field === 'title' ? 120 : field === 'subtitle' ? 200 : undefined;
 
     if (!maxLength) {
       return;
     }
 
-    for (const locale of TIMELINE_LOCALES) {
+    for (const locale of LOCALES) {
       if (value[locale].length > maxLength) {
         throw new BadRequestException(
           `"${field}.${locale}" exceeds max length of ${maxLength} characters.`,
@@ -223,7 +258,7 @@ export class TimelineService {
       return false;
     }
 
-    return TIMELINE_LOCALES.every((locale) => {
+    return LOCALES.every((locale) => {
       const localeValue = (value as Record<string, unknown>)[locale];
       return typeof localeValue === 'string' && localeValue.trim().length > 0;
     });
