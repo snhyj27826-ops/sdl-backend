@@ -1,20 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { LocalizedTextValue } from './timeline-localization';
-
+import {
+  LocalizedText,
+  LocalizedTextValue,
+} from '../../../common/localization/localization';
 export type TimelineEventDocument = TimelineEvent & Document;
-
-@Schema({ _id: false })
-export class LocalizedText {
-  @Prop({ required: true, trim: true })
-  en: string;
-
-  @Prop({ required: true, trim: true })
-  sr: string;
-
-  @Prop({ required: true, trim: true })
-  mk: string;
-}
 
 export const LocalizedTextSchema = SchemaFactory.createForClass(LocalizedText);
 
@@ -23,7 +13,7 @@ export const LocalizedTextSchema = SchemaFactory.createForClass(LocalizedText);
   timestamps: true,
 })
 export class TimelineEvent {
-  @Prop({ required: true, min: 1900 })
+  @Prop({ required: true, min: 100 })
   year: number;
 
   @Prop({ type: LocalizedTextSchema, required: true })

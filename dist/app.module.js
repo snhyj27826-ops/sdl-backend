@@ -17,6 +17,8 @@ const mongoose_1 = require("@nestjs/mongoose");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const content_module_1 = require("./modules/content/content.module");
 const content_admin_module_1 = require("./modules/content-admin/content-admin.module");
+const node_path_1 = require("node:path");
+const serve_static_1 = require("@nestjs/serve-static");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer.apply(logger_middleware_1.LoggerMiddleware).forRoutes({
@@ -29,6 +31,10 @@ exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
+            serve_static_1.ServeStaticModule.forRoot({
+                rootPath: (0, node_path_1.join)(process.cwd(), 'uploads'),
+                serveRoot: '/uploads',
+            }),
             config_1.ConfigModule.forRoot({
                 isGlobal: true,
             }),

@@ -6,6 +6,7 @@ import {
   OrganizationMember,
   OrganizationMemberDocument,
 } from './organization-member.schema';
+import { Locale } from '../../../common/localization/localization';
 
 @Injectable()
 export class OrganizationService {
@@ -14,18 +15,25 @@ export class OrganizationService {
     private readonly organizationMemberModel: Model<OrganizationMemberDocument>,
   ) {}
 
-  findPublished() {
-    return this.organizationMemberModel
+  async findPublished(locale: Locale) {
+    const members = await this.organizationMemberModel
       .find({ isPublished: true })
-      .sort({ sortOrder: 1, fullName: 1 })
+      .sort({ sortOrder: 1, [`fullName.${locale}`]: 1 })
       .lean()
       .exec();
+
+    return members.map((member) => ({
+      ...member,
+      fullName: member.fullName[locale],
+      role: member.role[locale],
+      biography: member.biography[locale],
+    }));
   }
 
   findAll() {
     return this.organizationMemberModel
       .find()
-      .sort({ sortOrder: 1, fullName: 1 })
+      .sort({ sortOrder: 1, 'fullName.en': 1 })
       .lean()
       .exec();
   }
@@ -36,7 +44,10 @@ export class OrganizationService {
 
   update(id: string, updateDto: Partial<CreateOrganizationMemberDto>) {
     return this.organizationMemberModel
-      .findByIdAndUpdate(id, updateDto, { new: true, runValidators: true })
+      .findByIdAndUpdate(id, updateDto, {
+        new: true,
+        runValidators: true,
+      })
       .lean()
       .exec();
   }

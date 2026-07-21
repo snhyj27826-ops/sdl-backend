@@ -1,21 +1,27 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import {
+  LocalizedText,
+  LocalizedTextValue,
+} from '../../../common/localization/localization';
 
 export type OrganizationMemberDocument = OrganizationMember & Document;
+
+export const LocalizedTextSchema = SchemaFactory.createForClass(LocalizedText);
 
 @Schema({
   collection: 'organization_members',
   timestamps: true,
 })
 export class OrganizationMember {
-  @Prop({ required: true, trim: true })
-  fullName: string;
+  @Prop({ type: LocalizedTextSchema, required: true })
+  fullName: LocalizedTextValue;
 
-  @Prop({ required: true, trim: true })
-  role: string;
+  @Prop({ type: LocalizedTextSchema, required: true })
+  role: LocalizedTextValue;
 
-  @Prop({ required: true, trim: true })
-  biography: string;
+  @Prop({ type: LocalizedTextSchema, required: true })
+  biography: LocalizedTextValue;
 
   @Prop({ trim: true })
   photo?: string;
@@ -27,4 +33,5 @@ export class OrganizationMember {
   isPublished: boolean;
 }
 
-export const OrganizationMemberSchema = SchemaFactory.createForClass(OrganizationMember);
+export const OrganizationMemberSchema =
+  SchemaFactory.createForClass(OrganizationMember);

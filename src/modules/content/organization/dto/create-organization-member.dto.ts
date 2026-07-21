@@ -1,16 +1,12 @@
-import { IsBoolean, IsInt, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsBoolean, IsInt, IsOptional, IsString } from 'class-validator';
+import { LocalizedTextValue } from '../../../../common/localization/localization';
 
 export class CreateOrganizationMemberDto {
-  @IsString()
-  @MaxLength(140)
-  fullName: string;
+  fullName: LocalizedTextValue;
 
-  @IsString()
-  @MaxLength(180)
-  role: string;
+  role: LocalizedTextValue;
 
-  @IsString()
-  biography: string;
+  biography: LocalizedTextValue;
 
   @IsOptional()
   @IsString()
