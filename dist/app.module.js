@@ -19,6 +19,7 @@ const content_module_1 = require("./modules/content/content.module");
 const content_admin_module_1 = require("./modules/content-admin/content-admin.module");
 const node_path_1 = require("node:path");
 const serve_static_1 = require("@nestjs/serve-static");
+const application_form_module_1 = require("./modules/application-form/application-form.module");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer.apply(logger_middleware_1.LoggerMiddleware).forRoutes({
@@ -50,6 +51,7 @@ exports.AppModule = AppModule = __decorate([
             user_module_1.UserModule,
             content_module_1.ContentModule,
             content_admin_module_1.ContentAdminModule,
+            application_form_module_1.ApplicationFormModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

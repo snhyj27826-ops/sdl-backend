@@ -10,6 +10,7 @@ import { ContentModule } from './modules/content/content.module';
 import { ContentAdminModule } from './modules/content-admin/content-admin.module';
 import { join } from 'node:path';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { ApplicationFormModule } from './modules/application-form/application-form.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
     UserModule,
     ContentModule,
     ContentAdminModule,
+    ApplicationFormModule,
   ],
   controllers: [AppController],
   providers: [AppService],
