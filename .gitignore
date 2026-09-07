@@ -3,3 +3,5 @@ dist
 
 tsconfig.build.tsbuildinfo
 tsconfig.build.json
+
+.env
