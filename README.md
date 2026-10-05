@@ -27,6 +27,17 @@ Whether you're building an API, a microservice, or a full-stack application, thi
 - **Custom Decorators**: Simplified access to user information in controllers.
 - **Environment Configuration**: Secure management of sensitive data using environment variables.
 
+## Database configuration
+
+Local runs connect to MongoDB at `mongodb://localhost:27017` by default. Start a
+local MongoDB instance, copy `.env.example` to `.env`, and run `npm run start:dev`.
+Set `MONGO_URI_LOCAL` in `.env` if your local MongoDB uses a different URI.
+
+For production, set `NODE_ENV=production` and provide the cloud MongoDB connection
+string through the `MONGO_URI` environment variable in the deployment environment.
+The application requires `MONGO_URI` in production; keep cloud credentials out of
+the repository. Both environments use `DB_NAME` for the database name.
+
 ## Architecture
 
 The project follows the **Modular** architecture pattern, promoting separation of concerns and scalability. Key modules include:

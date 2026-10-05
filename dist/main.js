@@ -10,7 +10,7 @@ async function bootstrap() {
     app.setGlobalPrefix('api');
     app.useGlobalInterceptors(new logging_interceptor_1.LoggingInterceptor());
     app.useGlobalFilters(new all_exceptions_filter_1.AllExceptionsFilter());
-    await app.listen(3000);
+    await app.listen(process.env.PORT || 3000);
 }
 bootstrap().catch((err) => console.log(err));
 //# sourceMappingURL=main.js.map

@@ -24,10 +24,20 @@ import { ApplicationFormModule } from './modules/application-form/application-fo
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGO_URI'),
-        dbName: configService.get<string>('DB_NAME'),
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const isProduction =
+          configService.get<string>('NODE_ENV') === 'production';
+
+        return {
+          uri: isProduction
+            ? configService.getOrThrow<string>('MONGO_URI')
+            : configService.get<string>(
+                'MONGO_URI_LOCAL',
+                'mongodb://localhost:27017',
+              ),
+          dbName: configService.get<string>('DB_NAME'),
+        };
+      },
     }),
     AuthModule,
     UserModule,

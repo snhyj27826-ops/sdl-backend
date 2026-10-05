@@ -42,10 +42,15 @@ exports.AppModule = AppModule = __decorate([
             mongoose_1.MongooseModule.forRootAsync({
                 imports: [config_1.ConfigModule],
                 inject: [config_1.ConfigService],
-                useFactory: async (configService) => ({
-                    uri: configService.get('MONGO_URI'),
-                    dbName: configService.get('DB_NAME'),
-                }),
+                useFactory: async (configService) => {
+                    const isProduction = configService.get('NODE_ENV') === 'production';
+                    return {
+                        uri: isProduction
+                            ? configService.getOrThrow('MONGO_URI')
+                            : configService.get('MONGO_URI_LOCAL', 'mongodb://localhost:27017'),
+                        dbName: configService.get('DB_NAME'),
+                    };
+                },
             }),
             auth_module_1.AuthModule,
             user_module_1.UserModule,
