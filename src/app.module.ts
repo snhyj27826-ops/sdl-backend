@@ -11,6 +11,7 @@ import { ContentAdminModule } from './modules/content-admin/content-admin.module
 import { join } from 'node:path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { ApplicationFormModule } from './modules/application-form/application-form.module';
+import { ContactModule } from './modules/contact/contact.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { ApplicationFormModule } from './modules/application-form/application-fo
     ContentModule,
     ContentAdminModule,
     ApplicationFormModule,
+    ContactModule,
   ],
   controllers: [AppController],
   providers: [AppService],
