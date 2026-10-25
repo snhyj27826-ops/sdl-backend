@@ -1,9 +1,54 @@
-node_modules/
-dist
+# Compiled output
+/dist
+/tmp
+/out-tsc
+/bazel-out
+*.tsbuildinfo
 
+# Dependencies
+/node_modules
+
+# Testing & Coverage
+/coverage
+/.nyc_output
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# User uploads and local storage
+/uploads
+
+# Environment variables and secrets
 .env
+.env.local
+.env.*.local
 .env.*
+*.env
 !.env.example
 
-tsconfig.build.tsbuildinfo
-tsconfig.build.json
+# Operating System files
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
