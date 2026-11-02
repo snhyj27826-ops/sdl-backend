@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateOrganizationMemberDto } from './dto/create-organization-member.dto';
@@ -28,6 +28,26 @@ export class OrganizationService {
       role: member.role[locale],
       biography: member.biography[locale],
     }));
+  }
+
+  async findPublishedByRole(locale: Locale, role: string) {
+    const member = await this.organizationMemberModel
+      .findOne({ isPublished: true, 'role.en': role })
+      .collation({ locale: 'en', strength: 2 })
+      .sort({ sortOrder: 1 })
+      .lean()
+      .exec();
+
+    if (!member) {
+      throw new NotFoundException(`No member found with role "${role}"`);
+    }
+
+    return {
+      ...member,
+      fullName: member.fullName[locale],
+      role: member.role[locale],
+      biography: member.biography[locale],
+    };
   }
 
   findAll() {
