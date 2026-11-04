@@ -5,6 +5,7 @@ import { Role } from '../auth/roles.enum';
 import { RolesGuard } from '../auth/roles.guard';
 import { CreateOrganizationMemberDto } from '../content/organization/dto/create-organization-member.dto';
 import { CreateTimelineEventDto } from '../content/timeline/dto/create-timeline-event.dto';
+import { CreateDocumentDto } from '../content/documents/dto/create-document.dto';
 import { ContentAdminService } from './content-admin.service';
 
 @Controller('admin/content')
@@ -57,5 +58,28 @@ export class ContentAdminController {
   @Delete('organization/:id')
   deleteOrganizationMember(@Param('id') id: string) {
     return this.contentAdminService.deleteOrganizationMember(id);
+  }
+
+  @Get('documents')
+  getDocuments() {
+    return this.contentAdminService.getDocuments();
+  }
+
+  @Post('documents')
+  createDocument(@Body() payload: CreateDocumentDto) {
+    return this.contentAdminService.createDocument(payload);
+  }
+
+  @Patch('documents/:id')
+  updateDocument(
+    @Param('id') id: string,
+    @Body() payload: Partial<CreateDocumentDto>,
+  ) {
+    return this.contentAdminService.updateDocument(id, payload);
+  }
+
+  @Delete('documents/:id')
+  deleteDocument(@Param('id') id: string) {
+    return this.contentAdminService.deleteDocument(id);
   }
 }
