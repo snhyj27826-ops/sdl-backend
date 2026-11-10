@@ -4,6 +4,10 @@ import {
   LocalizedText,
   LocalizedTextValue,
 } from '../../../common/localization/localization';
+import {
+  ORGANIZATION_CATEGORIES,
+  OrganizationCategory,
+} from './organization-category';
 
 export type OrganizationMemberDocument = OrganizationMember & Document;
 
@@ -22,6 +26,9 @@ export class OrganizationMember {
 
   @Prop({ type: LocalizedTextSchema, required: true })
   biography: LocalizedTextValue;
+
+  @Prop({ type: String, enum: ORGANIZATION_CATEGORIES, required: true, index: true })
+  category: OrganizationCategory;
 
   @Prop({ trim: true })
   photo?: string;

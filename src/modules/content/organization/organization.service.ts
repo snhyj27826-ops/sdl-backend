@@ -6,6 +6,7 @@ import {
   OrganizationMember,
   OrganizationMemberDocument,
 } from './organization-member.schema';
+import { OrganizationCategory } from './organization-category';
 import { Locale } from '../../../common/localization/localization';
 
 @Injectable()
@@ -15,9 +16,9 @@ export class OrganizationService {
     private readonly organizationMemberModel: Model<OrganizationMemberDocument>,
   ) {}
 
-  async findPublished(locale: Locale) {
+  async findPublished(locale: Locale, category?: OrganizationCategory) {
     const members = await this.organizationMemberModel
-      .find({ isPublished: true })
+      .find({ isPublished: true, ...(category && { category }) })
       .sort({ sortOrder: 1, [`fullName.${locale}`]: 1 })
       .lean()
       .exec();
@@ -30,16 +31,22 @@ export class OrganizationService {
     }));
   }
 
-  async findPublishedByRole(locale: Locale, role: string) {
+  async findPublishedMember(
+    locale: Locale,
+    category?: OrganizationCategory,
+    id?: string,
+  ) {
+    const filter = id
+      ? { isPublished: true, _id: id }
+      : { isPublished: true, category };
     const member = await this.organizationMemberModel
-      .findOne({ isPublished: true, 'role.en': role })
-      .collation({ locale: 'en', strength: 2 })
+      .findOne(filter)
       .sort({ sortOrder: 1 })
       .lean()
       .exec();
 
     if (!member) {
-      throw new NotFoundException(`No member found with role "${role}"`);
+      throw new NotFoundException(`No member found for ${id ? `id "${id}"` : `category "${category}"`}`);
     }
 
     return {

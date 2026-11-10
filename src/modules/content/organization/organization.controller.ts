@@ -1,5 +1,5 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { FindOrganizationMemberByRoleDto } from './dto/find-organization-member-by-role.dto';
+import { FindOrganizationMemberDto } from './dto/find-organization-member.dto';
 import { FindPublishedOrganizationMembersDto } from './dto/find-published-organization-members.dto';
 import { OrganizationService } from './organization.service';
 
@@ -9,14 +9,18 @@ export class OrganizationController {
 
   @Post()
   findPublished(@Body() body: FindPublishedOrganizationMembersDto) {
-    return this.organizationService.findPublished(body.locale ?? 'en');
+    return this.organizationService.findPublished(
+      body.locale ?? 'en',
+      body.category,
+    );
   }
 
   @Post('member')
-  findByRole(@Body() body: FindOrganizationMemberByRoleDto) {
-    return this.organizationService.findPublishedByRole(
+  findMember(@Body() body: FindOrganizationMemberDto) {
+    return this.organizationService.findPublishedMember(
       body.locale ?? 'en',
-      body.role,
+      body.category,
+      body.id,
     );
   }
 }

@@ -1,5 +1,8 @@
-import { IsBoolean, IsInt, IsOptional, IsString } from 'class-validator';
-import { LocalizedTextValue } from '../../../../common/localization/localization';
+import { IsBoolean, IsIn, IsInt, IsOptional, IsString } from 'class-validator';
+import { LocalizedTextValue } from '../../../../common/localization/localization';import {
+  ORGANIZATION_CATEGORIES,
+  OrganizationCategory,
+} from '../organization-category';
 
 export class CreateOrganizationMemberDto {
   fullName: LocalizedTextValue;
@@ -7,6 +10,9 @@ export class CreateOrganizationMemberDto {
   role: LocalizedTextValue;
 
   biography: LocalizedTextValue;
+
+  @IsIn(ORGANIZATION_CATEGORIES)
+  category: OrganizationCategory;
 
   @IsOptional()
   @IsString()
