@@ -23,6 +23,18 @@ async function bootstrap() {
       },
     }),
   );
+  app.use(
+    '/api/applications/party-rules-preview',
+    rateLimit({
+      windowMs: 15 * 60 * 1000,
+      limit: 60,
+      standardHeaders: true,
+      legacyHeaders: false,
+      message: {
+        message: 'Too many preview requests. Please try again later.',
+      },
+    }),
+  );
   app.enableCors();
   app.setGlobalPrefix('api');
   app.useGlobalInterceptors(new LoggingInterceptor());
