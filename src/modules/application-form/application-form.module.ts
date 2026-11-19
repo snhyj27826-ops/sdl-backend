@@ -8,6 +8,7 @@ import {
   ApplicationFormSchema,
 } from './application-form.schema';
 import { PdfModule } from './pdf/pdf.module';
+import { PartyRulesPdfModule } from './party-rules-pdf/party-rules-pdf.module';
 import { EmailModule } from '../email/email.module';
 
 @Module({
@@ -19,6 +20,7 @@ import { EmailModule } from '../email/email.module';
       },
     ]),
     PdfModule,
+    PartyRulesPdfModule,
     EmailModule,
   ],
   controllers: [ApplicationController],

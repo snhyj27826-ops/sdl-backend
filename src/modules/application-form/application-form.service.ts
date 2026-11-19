@@ -8,6 +8,7 @@ import {
   ApplicationForm,
 } from './application-form.schema';
 import { PdfService } from './pdf/pdf.service';
+import { PartyRulesPdfService } from './party-rules-pdf/party-rules-pdf.service';
 import { CreateApplicationDto } from './application-form.dto';
 
 @Injectable()
@@ -17,6 +18,8 @@ export class ApplicationFormService {
     private readonly applicationModel: Model<ApplicationDocument>,
 
     private readonly pdfService: PdfService,
+
+    private readonly partyRulesPdfService: PartyRulesPdfService,
 
     private readonly emailService: EmailService,
   ) {}
@@ -37,11 +40,38 @@ export class ApplicationFormService {
     // 4. Send the PDF by email
     await this.emailService.sendApplicationEmail('test@test.com', buffer, filename);
 
-    // 5. Return something useful to the frontend
+    // 5. Party rules agreement PDF (separate from the application PDF)
+    const partyRulesDocument = await this.createPartyRulesDocument(dto);
+
+    // 6. Return something useful to the frontend
     return {
       id: application._id,
       message: 'Application submitted successfully',
       document,
+      partyRulesDocument,
     };
+  }
+
+  // Only generated when the applicant agreed to the party's rules. A failure
+  // here must not affect the already completed application submission.
+  private async createPartyRulesDocument(dto: CreateApplicationDto) {
+    if (dto.consent !== true) {
+      return null;
+    }
+
+    try {
+      const { buffer, filename } =
+        await this.partyRulesPdfService.generatePartyRulesPdf(dto);
+
+      const { publicUrl } = await this.partyRulesPdfService.savePartyRulesPdf(
+        buffer,
+        filename,
+      );
+
+      return { publicUrl };
+    } catch (error) {
+      console.error('Failed to create party rules document:', error);
+      return null;
+    }
   }
 }
