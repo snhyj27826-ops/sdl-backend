@@ -15,6 +15,37 @@ export class Signature {
 
 export const SignatureSchema = SchemaFactory.createForClass(Signature);
 
+export type EmailDeliveryStatus = 'pending' | 'sending' | 'sent' | 'failed';
+
+// Tracks the notification email so failed sends can be retried from disk.
+@Schema({ _id: false })
+export class EmailDelivery {
+  @Prop({
+    required: true,
+    enum: ['pending', 'sending', 'sent', 'failed'],
+    default: 'pending',
+  })
+  status: EmailDeliveryStatus;
+
+  @Prop({ default: 0 })
+  attempts: number;
+
+  @Prop()
+  lastError?: string;
+
+  @Prop()
+  sentAt?: Date;
+
+  @Prop()
+  lockedAt?: Date;
+
+  // Paths relative to the uploads folder; the application PDF comes first.
+  @Prop({ type: [String], default: [] })
+  attachments: string[];
+}
+
+export const EmailDeliverySchema = SchemaFactory.createForClass(EmailDelivery);
+
 @Schema({ timestamps: true })
 export class ApplicationForm {
   @Prop({ required: true })
@@ -70,6 +101,9 @@ export class ApplicationForm {
 
   @Prop({ required: true })
   consent: boolean;
+
+  @Prop({ type: EmailDeliverySchema })
+  delivery?: EmailDelivery;
 
   createdAt: Date;
   updatedAt: Date;

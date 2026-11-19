@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { ApplicationController } from './application-form.controller';
 import { ApplicationFormService } from './application-form.service';
+import { ApplicationEmailRetryService } from './application-email-retry.service';
 import {
   ApplicationForm,
   ApplicationFormSchema,
@@ -24,6 +25,6 @@ import { EmailModule } from '../email/email.module';
     EmailModule,
   ],
   controllers: [ApplicationController],
-  providers: [ApplicationFormService],
+  providers: [ApplicationFormService, ApplicationEmailRetryService],
 })
 export class ApplicationFormModule {}
