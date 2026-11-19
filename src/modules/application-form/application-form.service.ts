@@ -11,6 +11,8 @@ import { PdfService } from './pdf/pdf.service';
 import { PartyRulesPdfService } from './party-rules-pdf/party-rules-pdf.service';
 import { CreateApplicationDto } from './application-form.dto';
 
+const APPLICATION_RECIPIENT = 'info@sdl.org.mk';
+
 @Injectable()
 export class ApplicationFormService {
   constructor(
@@ -42,13 +44,17 @@ export class ApplicationFormService {
       folder,
     );
 
-    // 4. Send the PDF by email
-    await this.emailService.sendApplicationEmail('test@test.com', buffer, filename);
+    // 4. Party rules agreement PDF (separate from the application PDF)
+    const partyRules = await this.createPartyRulesDocument(dto, folder);
 
-    // 5. Party rules agreement PDF (separate from the application PDF)
-    const partyRulesDocument = await this.createPartyRulesDocument(
-      dto,
-      folder,
+    // 5. Send both PDFs by email
+    await this.emailService.sendApplicationEmail(
+      APPLICATION_RECIPIENT,
+      buffer,
+      filename,
+      partyRules
+        ? [{ filename: partyRules.filename, content: partyRules.buffer }]
+        : [],
     );
 
     // 6. Return something useful to the frontend
@@ -56,7 +62,7 @@ export class ApplicationFormService {
       id: application._id,
       message: 'Application submitted successfully',
       document,
-      partyRulesDocument,
+      partyRulesDocument: partyRules && { publicUrl: partyRules.publicUrl },
     };
   }
 
@@ -80,7 +86,7 @@ export class ApplicationFormService {
         folder,
       );
 
-      return { publicUrl };
+      return { publicUrl, buffer, filename };
     } catch (error) {
       console.error('Failed to create party rules document:', error);
       return null;

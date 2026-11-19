@@ -42,19 +42,23 @@ export class EmailService {
     to: string,
     pdfBuffer: Buffer,
     filename: string,
+    additionalPdfs: { filename: string; content: Buffer }[] = [],
   ): Promise<void> {
+    const pdfs = [{ filename, content: pdfBuffer }, ...additionalPdfs];
+
     await this.getTransporter().sendMail({
       from: this.getFromAddress(),
       to,
       subject: 'Application',
-      text: 'Please find the application attached.',
-      attachments: [
-        {
-          filename,
-          content: pdfBuffer,
-          contentType: 'application/pdf',
-        },
-      ],
+      text:
+        pdfs.length > 1
+          ? 'Please find the application and the signed party rules agreement attached.'
+          : 'Please find the application attached.',
+      attachments: pdfs.map((pdf) => ({
+        filename: pdf.filename,
+        content: pdf.content,
+        contentType: 'application/pdf',
+      })),
     });
   }
 
