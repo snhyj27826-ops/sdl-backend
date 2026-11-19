@@ -1,5 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { PDFDocument, PDFFont, PDFTextField } from 'pdf-lib';
+import {
+  PDFDocument,
+  PDFFont,
+  PDFPage,
+  PDFTextField,
+  PDFWidgetAnnotation,
+} from 'pdf-lib';
 import * as fontkit from '@pdf-lib/fontkit';
 import { promises as fs } from 'fs';
 import { join } from 'path';
@@ -14,6 +20,13 @@ export interface PartyRulesApplicant {
     dataUrl: string;
   };
 }
+
+// Whatever the applicant has filled in so far; used for the live preview.
+export type PartyRulesPreviewInput = Partial<
+  Omit<PartyRulesApplicant, 'handwrittenSignature'>
+> & {
+  handwrittenSignature?: Partial<PartyRulesApplicant['handwrittenSignature']>;
+};
 
 export const PARTY_ADDRESS = 'Антон Попов 1/1-1';
 export const PARTY_PLACE = 'Скопје';
@@ -38,6 +51,25 @@ export class PartyRulesPdfService {
     applicant: PartyRulesApplicant,
     now: number = Date.now(),
   ): Promise<{ buffer: Buffer; filename: string }> {
+    return {
+      buffer: await this.buildPdf(applicant, now),
+      filename: this.createFilename(applicant, now),
+    };
+  }
+
+  // Same document as the final agreement, but tolerant of a partially filled
+  // form. Nothing is stored.
+  public generatePartyRulesPreview(
+    input: PartyRulesPreviewInput,
+    now: number = Date.now(),
+  ): Promise<Buffer> {
+    return this.buildPdf(input, now);
+  }
+
+  private async buildPdf(
+    applicant: PartyRulesPreviewInput,
+    now: number,
+  ): Promise<Buffer> {
     try {
       const templateBuffer = await fs.readFile(
         join(process.cwd(), 'assets', TEMPLATE_FILENAME),
@@ -70,13 +102,10 @@ export class PartyRulesPdfService {
       await this.populateSignature(
         pdfDoc,
         form,
-        applicant.handwrittenSignature.dataUrl,
+        applicant.handwrittenSignature?.dataUrl,
       );
 
-      return {
-        buffer: Buffer.from(await pdfDoc.save()),
-        filename: this.createFilename(applicant, now),
-      };
+      return Buffer.from(await pdfDoc.save());
     } catch (error) {
       console.error('Failed to generate party rules PDF:', error);
       throw error;
@@ -140,7 +169,7 @@ export class PartyRulesPdfService {
     }
   }
 
-  private formatFullName(applicant: PartyRulesApplicant): string {
+  private formatFullName(applicant: PartyRulesPreviewInput): string {
     return [applicant.firstName, applicant.fathersName, applicant.lastName]
       .map((part) => part?.trim())
       .filter(Boolean)
@@ -167,8 +196,13 @@ export class PartyRulesPdfService {
   private async populateSignature(
     pdfDoc: PDFDocument,
     form: ReturnType<PDFDocument['getForm']>,
-    dataUrl: string,
+    dataUrl: string | undefined,
   ): Promise<void> {
+    if (!dataUrl) {
+      this.removeSignatureField(pdfDoc, form);
+      return;
+    }
+
     const match = /^data:image\/(png|jpe?g);base64,(.+)$/i.exec(dataUrl);
 
     if (!match) {
@@ -187,15 +221,7 @@ export class PartyRulesPdfService {
       throw new Error('PDF signature field has no widget.');
     }
 
-    const widgetRef = pdfDoc.context.getObjectRef(widget.dict);
-    const page = pdfDoc
-      .getPages()
-      .find((candidate) =>
-        candidate.node
-          .Annots()
-          ?.asArray()
-          .some((annot) => annot === widgetRef),
-      );
+    const page = this.findWidgetPage(pdfDoc, widget);
 
     if (!page) {
       throw new Error(
@@ -220,7 +246,37 @@ export class PartyRulesPdfService {
 
     // The signature now lives in the page content; an empty button widget
     // on top of it would render as a grey box in some viewers.
-    page.node.removeAnnot(widgetRef);
-    form.removeField(form.getField(FIELDS.signature));
+    this.removeSignatureField(pdfDoc, form);
+  }
+
+  private findWidgetPage(
+    pdfDoc: PDFDocument,
+    widget: PDFWidgetAnnotation,
+  ): PDFPage | undefined {
+    const widgetRef = pdfDoc.context.getObjectRef(widget.dict);
+
+    return pdfDoc
+      .getPages()
+      .find((candidate) =>
+        candidate.node
+          .Annots()
+          ?.asArray()
+          .some((annot) => annot === widgetRef),
+      );
+  }
+
+  private removeSignatureField(
+    pdfDoc: PDFDocument,
+    form: ReturnType<PDFDocument['getForm']>,
+  ): void {
+    const field = form.getField(FIELDS.signature);
+    const widget = field.acroField.getWidgets()[0];
+    const page = widget && this.findWidgetPage(pdfDoc, widget);
+
+    if (page) {
+      page.node.removeAnnot(pdfDoc.context.getObjectRef(widget.dict)!);
+    }
+
+    form.removeField(field);
   }
 }

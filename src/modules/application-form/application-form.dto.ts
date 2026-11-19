@@ -86,3 +86,22 @@ export class CreateApplicationDto {
   @IsBoolean()
   consent: boolean;
 }
+
+export class PartyRulesPreviewDto {
+  @IsOptional()
+  @IsString()
+  firstName?: string;
+
+  @IsOptional()
+  @IsString()
+  fathersName?: string;
+
+  @IsOptional()
+  @IsString()
+  lastName?: string;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => SignatureDto)
+  handwrittenSignature?: SignatureDto;
+}

@@ -61,6 +61,30 @@ describe('PartyRulesPdfService', () => {
     expect(template.getTextField('fullName').getText()).toBeUndefined();
   });
 
+  it('renders a preview from a partially filled form', async () => {
+    const buffer = await service.generatePartyRulesPreview(
+      { firstName: 'Јован' },
+      Date.UTC(2026, 10, 19, 12),
+    );
+
+    const doc = await PDFDocument.load(buffer);
+    const form = doc.getForm();
+    expect(form.getTextField('fullName').getText()).toBe('Јован');
+    expect(form.getTextField('dateToday').getText()).toBe('19/11/2026');
+    expect(form.getFields().map((field) => field.getName())).not.toContain(
+      'signature',
+    );
+    expect(doc.getPageCount()).toBe(2);
+  });
+
+  it('renders a preview with an empty form', async () => {
+    const buffer = await service.generatePartyRulesPreview({});
+
+    const form = (await PDFDocument.load(buffer)).getForm();
+    expect(form.getTextField('fullName').getText() ?? '').toBe('');
+    expect(form.getTextField('partyAddress').getText()).toBe(PARTY_ADDRESS);
+  });
+
   it('rejects an invalid signature', async () => {
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
 
