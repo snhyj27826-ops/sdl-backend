@@ -4,6 +4,7 @@ import {
   Controller,
   Header,
   HttpCode,
+  Logger,
   Post,
   StreamableFile,
 } from '@nestjs/common';
@@ -16,6 +17,8 @@ import { PartyRulesPdfService } from './party-rules-pdf/party-rules-pdf.service'
 
 @Controller('applications')
 export class ApplicationController {
+  private readonly logger = new Logger(ApplicationController.name);
+
   constructor(
     private readonly applicationService: ApplicationFormService,
     private readonly partyRulesPdfService: PartyRulesPdfService,
@@ -39,6 +42,10 @@ export class ApplicationController {
 
       return new StreamableFile(buffer);
     } catch (error) {
+      this.logger.error(
+        'Party rules preview failed',
+        error instanceof Error ? error.stack : String(error),
+      );
       throw new BadRequestException(
         error instanceof Error && error.message.includes('signature')
           ? error.message

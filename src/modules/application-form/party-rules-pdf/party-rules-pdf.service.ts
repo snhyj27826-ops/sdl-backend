@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import {
   PDFDocument,
   PDFFont,
@@ -7,7 +7,7 @@ import {
   PDFWidgetAnnotation,
 } from 'pdf-lib';
 import * as fontkit from '@pdf-lib/fontkit';
-import { promises as fs } from 'fs';
+import { constants, promises as fs } from 'fs';
 import { join } from 'path';
 import { randomUUID } from 'crypto';
 
@@ -47,7 +47,32 @@ const FIELDS = {
 } as const;
 
 @Injectable()
-export class PartyRulesPdfService {
+export class PartyRulesPdfService implements OnModuleInit {
+  private readonly logger = new Logger(PartyRulesPdfService.name);
+
+  // Surfaces a bad deployment (missing assets, wrong working directory) at
+  // startup instead of on the first applicant's request.
+  async onModuleInit(): Promise<void> {
+    const assets = [
+      join(process.cwd(), 'assets', TEMPLATE_FILENAME),
+      join(process.cwd(), 'assets', 'fonts', 'NotoSans-Regular.ttf'),
+      join(process.cwd(), 'uploads', OUTPUT_DIR),
+    ];
+
+    for (const path of assets) {
+      try {
+        if (path.endsWith(OUTPUT_DIR)) {
+          await fs.mkdir(path, { recursive: true });
+        }
+        await fs.access(path, constants.R_OK | constants.W_OK);
+      } catch (error) {
+        this.logger.error(
+          `Not accessible: ${path} (${(error as NodeJS.ErrnoException).code}); cwd=${process.cwd()}`,
+        );
+      }
+    }
+  }
+
   public async generatePartyRulesPdf(
     applicant: PartyRulesApplicant,
     now: number = Date.now(),
