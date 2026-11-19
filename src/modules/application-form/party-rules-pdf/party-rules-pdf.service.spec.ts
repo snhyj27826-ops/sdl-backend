@@ -85,6 +85,29 @@ describe('PartyRulesPdfService', () => {
     expect(form.getTextField('partyAddress').getText()).toBe(PARTY_ADDRESS);
   });
 
+  it('saves the PDF in the given application folder', async () => {
+    const { buffer, filename } = await service.generatePartyRulesPdf(applicant);
+    const folder = 'test-folder-1763583000000';
+    const { filePath, publicUrl } = await service.savePartyRulesPdf(
+      buffer,
+      filename,
+      folder,
+    );
+
+    try {
+      expect(filePath).toBe(
+        join(process.cwd(), 'uploads', 'applications', folder, filename),
+      );
+      expect(publicUrl).toBe(`/uploads/applications/${folder}/${filename}`);
+      expect(await fs.readFile(filePath)).toEqual(buffer);
+    } finally {
+      await fs.rm(join(process.cwd(), 'uploads', 'applications', folder), {
+        recursive: true,
+        force: true,
+      });
+    }
+  });
+
   it('rejects an invalid signature', async () => {
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
 

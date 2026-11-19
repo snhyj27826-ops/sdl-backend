@@ -110,8 +110,10 @@ export class PdfService {
   public async saveApplicationPdf(
     pdfBuffer: Buffer,
     filename: string,
+    folder?: string,
   ): Promise<{ filePath: string; publicUrl: string }> {
-    const uploadsDir = join(process.cwd(), 'uploads', 'applications');
+    const relativeDir = folder ? `applications/${folder}` : 'applications';
+    const uploadsDir = join(process.cwd(), 'uploads', relativeDir);
     const filePath = join(uploadsDir, filename);
 
     await fs.mkdir(uploadsDir, { recursive: true });
@@ -119,7 +121,7 @@ export class PdfService {
 
     return {
       filePath,
-      publicUrl: `/uploads/applications/${filename}`,
+      publicUrl: `/uploads/${relativeDir}/${filename}`,
     };
   }
 

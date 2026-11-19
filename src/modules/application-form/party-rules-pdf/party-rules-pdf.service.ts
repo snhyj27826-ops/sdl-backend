@@ -32,7 +32,8 @@ export const PARTY_ADDRESS = 'Антон Попов 1/1-1';
 export const PARTY_PLACE = 'Скопје';
 
 const TEMPLATE_FILENAME = 'sdl-party-rules-template.pdf';
-const OUTPUT_DIR = 'party-rules';
+// Shared with the application PDFs; each application gets its own subfolder.
+const OUTPUT_DIR = 'applications';
 const DEFAULT_FONT_SIZE = 11;
 
 // Field names defined in assets/sdl-party-rules-template.pdf.
@@ -115,8 +116,10 @@ export class PartyRulesPdfService {
   public async savePartyRulesPdf(
     pdfBuffer: Buffer,
     filename: string,
+    folder?: string,
   ): Promise<{ filePath: string; publicUrl: string }> {
-    const uploadsDir = join(process.cwd(), 'uploads', OUTPUT_DIR);
+    const relativeDir = folder ? `${OUTPUT_DIR}/${folder}` : OUTPUT_DIR;
+    const uploadsDir = join(process.cwd(), 'uploads', relativeDir);
     const filePath = join(uploadsDir, filename);
 
     await fs.mkdir(uploadsDir, { recursive: true });
@@ -124,7 +127,7 @@ export class PartyRulesPdfService {
 
     return {
       filePath,
-      publicUrl: `/uploads/${OUTPUT_DIR}/${filename}`,
+      publicUrl: `/uploads/${relativeDir}/${filename}`,
     };
   }
 

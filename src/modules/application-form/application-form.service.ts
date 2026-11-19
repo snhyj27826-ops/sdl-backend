@@ -34,14 +34,22 @@ export class ApplicationFormService {
       application.createdAt,
     );
 
-    // 3. Save the PDF on disk
-    const document = await this.pdfService.saveApplicationPdf(buffer, filename);
+    // 3. Save the PDF on disk, in a folder shared with the party rules PDF
+    const folder = this.createApplicationFolderName(dto, application.createdAt);
+    const document = await this.pdfService.saveApplicationPdf(
+      buffer,
+      filename,
+      folder,
+    );
 
     // 4. Send the PDF by email
     await this.emailService.sendApplicationEmail('test@test.com', buffer, filename);
 
     // 5. Party rules agreement PDF (separate from the application PDF)
-    const partyRulesDocument = await this.createPartyRulesDocument(dto);
+    const partyRulesDocument = await this.createPartyRulesDocument(
+      dto,
+      folder,
+    );
 
     // 6. Return something useful to the frontend
     return {
@@ -54,7 +62,10 @@ export class ApplicationFormService {
 
   // Only generated when the applicant agreed to the party's rules. A failure
   // here must not affect the already completed application submission.
-  private async createPartyRulesDocument(dto: CreateApplicationDto) {
+  private async createPartyRulesDocument(
+    dto: CreateApplicationDto,
+    folder: string,
+  ) {
     if (dto.consent !== true) {
       return null;
     }
@@ -66,6 +77,7 @@ export class ApplicationFormService {
       const { publicUrl } = await this.partyRulesPdfService.savePartyRulesPdf(
         buffer,
         filename,
+        folder,
       );
 
       return { publicUrl };
@@ -73,5 +85,19 @@ export class ApplicationFormService {
       console.error('Failed to create party rules document:', error);
       return null;
     }
+  }
+
+  // firstName-lastName-timestamp: one folder per application.
+  private createApplicationFolderName(
+    dto: CreateApplicationDto,
+    createdAt: Date,
+  ): string {
+    const clean = (value: string) =>
+      value
+        .trim()
+        .replace(/[<>:"/\\|?*\x00-\x1F]/g, '')
+        .replace(/\s+/g, '-');
+
+    return `${clean(dto.firstName)}-${clean(dto.lastName)}-${createdAt.getTime()}`;
   }
 }
