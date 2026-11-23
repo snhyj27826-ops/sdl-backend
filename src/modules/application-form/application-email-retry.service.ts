@@ -1,11 +1,18 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ApplicationFormService } from './application-form.service';
 
 const RETRY_INTERVAL_MS = 5 * 60 * 1000;
 
 // Periodically re-sends application emails that failed or were interrupted.
 @Injectable()
-export class ApplicationEmailRetryService implements OnModuleInit, OnModuleDestroy {
+export class ApplicationEmailRetryService
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(ApplicationEmailRetryService.name);
   private timer?: NodeJS.Timeout;
   private running = false;

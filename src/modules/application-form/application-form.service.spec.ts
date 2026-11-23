@@ -14,14 +14,13 @@ describe('ApplicationFormService', () => {
   const claimedDoc = {
     delivery: {
       attempts: 1,
-      attachments: [
-        'applications/f/app.pdf',
-        'applications/f/party-rules.pdf',
-      ],
+      attachments: ['applications/f/app.pdf', 'applications/f/party-rules.pdf'],
     },
   };
 
-  const build = (options: { partyRulesFails?: boolean; emailFails?: boolean } = {}) => {
+  const build = (
+    options: { partyRulesFails?: boolean; emailFails?: boolean } = {},
+  ) => {
     const pdfService = {
       generateApplicationPdf: jest
         .fn()
@@ -35,7 +34,10 @@ describe('ApplicationFormService', () => {
         ? jest.fn().mockRejectedValue(new Error('boom'))
         : jest
             .fn()
-            .mockResolvedValue({ buffer: Buffer.from('rules'), filename: 'party-rules.pdf' }),
+            .mockResolvedValue({
+              buffer: Buffer.from('rules'),
+              filename: 'party-rules.pdf',
+            }),
       savePartyRulesPdf: jest.fn().mockResolvedValue({
         publicUrl: '/uploads/applications/f/party-rules.pdf',
       }),
