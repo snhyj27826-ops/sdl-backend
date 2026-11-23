@@ -26,7 +26,7 @@ export class OrganizationService {
     return members.map((member) => ({
       ...member,
       fullName: member.fullName[locale],
-      role: member.role[locale],
+      profession: member.profession[locale],
       biography: member.biography[locale],
     }));
   }
@@ -52,7 +52,7 @@ export class OrganizationService {
     return {
       ...member,
       fullName: member.fullName[locale],
-      role: member.role[locale],
+      profession: member.profession[locale],
       biography: member.biography[locale],
     };
   }

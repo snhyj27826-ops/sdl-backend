@@ -1,5 +1,14 @@
-import { IsBoolean, IsIn, IsInt, IsOptional, IsString } from 'class-validator';
-import { LocalizedTextValue } from '../../../../common/localization/localization';import {
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsBoolean,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+} from 'class-validator';
+import { LocalizedTextValue } from '../../../../common/localization/localization';
+import {
   ORGANIZATION_CATEGORIES,
   OrganizationCategory,
 } from '../organization-category';
@@ -7,12 +16,14 @@ import { LocalizedTextValue } from '../../../../common/localization/localization
 export class CreateOrganizationMemberDto {
   fullName: LocalizedTextValue;
 
-  role: LocalizedTextValue;
+  profession: LocalizedTextValue;
 
   biography: LocalizedTextValue;
 
-  @IsIn(ORGANIZATION_CATEGORIES)
-  category: OrganizationCategory;
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsIn(ORGANIZATION_CATEGORIES, { each: true })
+  category: OrganizationCategory[];
 
   @IsOptional()
   @IsString()

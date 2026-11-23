@@ -22,13 +22,22 @@ export class OrganizationMember {
   fullName: LocalizedTextValue;
 
   @Prop({ type: LocalizedTextSchema, required: true })
-  role: LocalizedTextValue;
+  profession: LocalizedTextValue;
 
   @Prop({ type: LocalizedTextSchema, required: true })
   biography: LocalizedTextValue;
 
-  @Prop({ type: String, enum: ORGANIZATION_CATEGORIES, required: true, index: true })
-  category: OrganizationCategory;
+  @Prop({
+    type: [{ type: String, enum: ORGANIZATION_CATEGORIES }],
+    required: true,
+    index: true,
+    validate: {
+      validator: (value: OrganizationCategory[]) =>
+        Array.isArray(value) && value.length > 0,
+      message: 'category must contain at least one value',
+    },
+  })
+  category: OrganizationCategory[];
 
   @Prop({ trim: true })
   photo?: string;

@@ -21,7 +21,8 @@
     "sequelize": "sequelize",
     "migrate": "sequelize db:migrate",
     "migrate:undo": "sequelize db:migrate:undo",
-    "seed": "sequelize db:seed:all"
+    "seed": "sequelize db:seed:all",
+    "migrate:organization-members": "node scripts/migrations/20261123-organization-members-category-array-profession.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.26",
