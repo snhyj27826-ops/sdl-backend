@@ -1,3 +1,4 @@
+import { ASSETS_DIR, UPLOADS_DIR } from '../../../common/paths';
 import { Injectable } from '@nestjs/common';
 import { PDFDocument } from 'pdf-lib';
 import * as fontkit from '@pdf-lib/fontkit';
@@ -30,11 +31,7 @@ export class PdfService {
     createdAt: Date,
   ): Promise<{ buffer: Buffer; filename: string }> {
     try {
-      const templatePath = join(
-        process.cwd(),
-        'assets',
-        'sdl-pristapnica-sig.pdf',
-      );
+      const templatePath = join(ASSETS_DIR, 'sdl-pristapnica-sig.pdf');
 
       const templateBuffer = await fs.readFile(templatePath);
 
@@ -44,12 +41,7 @@ export class PdfService {
 
       const form = pdfDoc.getForm();
 
-      const fontPath = join(
-        process.cwd(),
-        'assets',
-        'fonts',
-        'NotoSans-Regular.ttf',
-      );
+      const fontPath = join(ASSETS_DIR, 'fonts', 'NotoSans-Regular.ttf');
 
       const fontBytes = await fs.readFile(fontPath);
 
@@ -113,7 +105,7 @@ export class PdfService {
     folder?: string,
   ): Promise<{ filePath: string; publicUrl: string }> {
     const relativeDir = folder ? `applications/${folder}` : 'applications';
-    const uploadsDir = join(process.cwd(), 'uploads', relativeDir);
+    const uploadsDir = join(UPLOADS_DIR, relativeDir);
     const filePath = join(uploadsDir, filename);
 
     await fs.mkdir(uploadsDir, { recursive: true });

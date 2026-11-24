@@ -1,3 +1,4 @@
+import { UPLOADS_DIR } from '../../common/paths';
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -116,7 +117,7 @@ export class ApplicationFormService {
       const [primary, ...rest] = await Promise.all(
         claimed.delivery.attachments.map(async (relativePath) => ({
           filename: basename(relativePath),
-          content: await fs.readFile(join(process.cwd(), 'uploads', relativePath)),
+          content: await fs.readFile(join(UPLOADS_DIR, relativePath)),
         })),
       );
 

@@ -32,7 +32,6 @@ export class ApplicationController {
   // Renders the party rules PDF from the current form state without storing it.
   @Post('party-rules-preview')
   @HttpCode(200)
-  @Header('Content-Type', 'application/pdf')
   @Header('Cache-Control', 'no-store')
   async previewPartyRules(@Body() dto: PartyRulesPreviewDto) {
     try {
@@ -40,7 +39,7 @@ export class ApplicationController {
         dto ?? {},
       );
 
-      return new StreamableFile(buffer);
+      return new StreamableFile(buffer, { type: 'application/pdf' });
     } catch (error) {
       this.logger.error(
         'Party rules preview failed',

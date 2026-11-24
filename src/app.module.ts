@@ -8,7 +8,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { ContentModule } from './modules/content/content.module';
 import { ContentAdminModule } from './modules/content-admin/content-admin.module';
-import { join } from 'node:path';
+import { UPLOADS_DIR } from './common/paths';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { ApplicationFormModule } from './modules/application-form/application-form.module';
 import { ContactModule } from './modules/contact/contact.module';
@@ -16,7 +16,7 @@ import { ContactModule } from './modules/contact/contact.module';
 @Module({
   imports: [
     ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), 'uploads'),
+      rootPath: UPLOADS_DIR,
       serveRoot: '/uploads',
     }),
     ConfigModule.forRoot({

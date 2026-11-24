@@ -1,3 +1,4 @@
+import { ASSETS_DIR, UPLOADS_DIR } from '../../../common/paths';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import {
   PDFDocument,
@@ -54,9 +55,9 @@ export class PartyRulesPdfService implements OnModuleInit {
   // startup instead of on the first applicant's request.
   async onModuleInit(): Promise<void> {
     const assets = [
-      join(process.cwd(), 'assets', TEMPLATE_FILENAME),
-      join(process.cwd(), 'assets', 'fonts', 'NotoSans-Regular.ttf'),
-      join(process.cwd(), 'uploads', OUTPUT_DIR),
+      join(ASSETS_DIR, TEMPLATE_FILENAME),
+      join(ASSETS_DIR, 'fonts', 'NotoSans-Regular.ttf'),
+      join(UPLOADS_DIR, OUTPUT_DIR),
     ];
 
     for (const path of assets) {
@@ -98,10 +99,10 @@ export class PartyRulesPdfService implements OnModuleInit {
   ): Promise<Buffer> {
     try {
       const templateBuffer = await fs.readFile(
-        join(process.cwd(), 'assets', TEMPLATE_FILENAME),
+        join(ASSETS_DIR, TEMPLATE_FILENAME),
       );
       const fontBytes = await fs.readFile(
-        join(process.cwd(), 'assets', 'fonts', 'NotoSans-Regular.ttf'),
+        join(ASSETS_DIR, 'fonts', 'NotoSans-Regular.ttf'),
       );
 
       // The template is only ever read; every applicant gets a fresh copy.
@@ -144,7 +145,7 @@ export class PartyRulesPdfService implements OnModuleInit {
     folder?: string,
   ): Promise<{ filePath: string; publicUrl: string }> {
     const relativeDir = folder ? `${OUTPUT_DIR}/${folder}` : OUTPUT_DIR;
-    const uploadsDir = join(process.cwd(), 'uploads', relativeDir);
+    const uploadsDir = join(UPLOADS_DIR, relativeDir);
     const filePath = join(uploadsDir, filename);
 
     await fs.mkdir(uploadsDir, { recursive: true });
@@ -283,14 +284,12 @@ export class PartyRulesPdfService implements OnModuleInit {
   ): PDFPage | undefined {
     const widgetRef = pdfDoc.context.getObjectRef(widget.dict);
 
-    return pdfDoc
-      .getPages()
-      .find((candidate) =>
-        candidate.node
-          .Annots()
-          ?.asArray()
-          .some((annot) => annot === widgetRef),
-      );
+    return pdfDoc.getPages().find((candidate) =>
+      candidate.node
+        .Annots()
+        ?.asArray()
+        .some((annot) => annot === widgetRef),
+    );
   }
 
   private removeSignatureField(
