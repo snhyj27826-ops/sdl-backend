@@ -62,6 +62,30 @@ export class EmailService {
     });
   }
 
+  // Confirmation copy for the applicant, with the same PDFs the party receives.
+  async sendApplicantCopyEmail(
+    to: string,
+    pdfs: { filename: string; content: Buffer }[],
+  ): Promise<void> {
+    await this.getTransporter().sendMail({
+      from: this.getFromAddress(),
+      to,
+      subject: 'Вашата пристапница во СДЛ',
+      text: [
+        'Ви благодариме за поднесената пристапница.',
+        '',
+        pdfs.length > 1
+          ? 'Во прилог се Вашата пристапница и потпишаната согласност со Статутот на партијата.'
+          : 'Во прилог е Вашата пристапница.',
+      ].join('\n'),
+      attachments: pdfs.map((pdf) => ({
+        filename: pdf.filename,
+        content: pdf.content,
+        contentType: 'application/pdf',
+      })),
+    });
+  }
+
   async sendContactEmail(data: {
     name: string;
     email: string;

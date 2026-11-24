@@ -12,6 +12,7 @@ describe('ApplicationFormService', () => {
   } as never;
 
   const claimedDoc = {
+    email: 'jovan@example.com',
     delivery: {
       attempts: 1,
       attachments: ['applications/f/app.pdf', 'applications/f/party-rules.pdf'],
@@ -46,6 +47,7 @@ describe('ApplicationFormService', () => {
       sendApplicationEmail: options.emailFails
         ? jest.fn().mockRejectedValue(new Error('smtp down'))
         : jest.fn().mockResolvedValue(undefined),
+      sendApplicantCopyEmail: jest.fn().mockResolvedValue(undefined),
     };
     const model = {
       create: jest.fn().mockResolvedValue({ _id: 'id1', createdAt }),
@@ -174,5 +176,47 @@ describe('ApplicationFormService', () => {
 
     await expect(service.retryPendingEmails()).resolves.toBe(2);
     expect(emailService.sendApplicationEmail).toHaveBeenCalledTimes(2);
+  });
+
+  it('sends the applicant a copy with both PDFs', async () => {
+    const { service, emailService } = build();
+
+    await expect(service.deliverEmail('id1')).resolves.toBe(true);
+    expect(emailService.sendApplicantCopyEmail).toHaveBeenCalledWith(
+      'jovan@example.com',
+      [
+        { filename: 'app.pdf', content: expect.any(Buffer) },
+        { filename: 'party-rules.pdf', content: expect.any(Buffer) },
+      ],
+    );
+  });
+
+  it('on retry, only sends to recipients that have not received it yet', async () => {
+    const { service, model, emailService } = build();
+    model.findOneAndUpdate.mockResolvedValue({
+      ...claimedDoc,
+      delivery: { ...claimedDoc.delivery, partySentAt: new Date() },
+    });
+
+    await expect(service.deliverEmail('id1')).resolves.toBe(true);
+    expect(emailService.sendApplicationEmail).not.toHaveBeenCalled();
+    expect(emailService.sendApplicantCopyEmail).toHaveBeenCalledTimes(1);
+  });
+
+  it('marks for retry without re-sending to the party when the applicant email fails', async () => {
+    const { service, model, emailService } = build();
+    emailService.sendApplicantCopyEmail.mockRejectedValue(new Error('bounce'));
+
+    await expect(service.deliverEmail('id1')).resolves.toBe(false);
+    expect(model.updateOne).toHaveBeenCalledWith(
+      { _id: 'id1' },
+      { $set: { 'delivery.partySentAt': expect.any(Date) } },
+    );
+    expect(model.updateOne).toHaveBeenLastCalledWith(
+      { _id: 'id1' },
+      expect.objectContaining({
+        $set: expect.objectContaining({ 'delivery.status': 'failed' }),
+      }),
+    );
   });
 });

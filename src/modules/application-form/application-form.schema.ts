@@ -33,8 +33,17 @@ export class EmailDelivery {
   @Prop()
   lastError?: string;
 
+  // Set once every recipient below has received the email.
   @Prop()
   sentAt?: Date;
+
+  // Tracked per recipient so a retry never re-sends to someone who already
+  // received it.
+  @Prop()
+  partySentAt?: Date;
+
+  @Prop()
+  applicantSentAt?: Date;
 
   @Prop()
   lockedAt?: Date;

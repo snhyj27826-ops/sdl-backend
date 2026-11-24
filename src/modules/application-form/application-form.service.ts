@@ -125,12 +125,29 @@ export class ApplicationFormService {
         throw new Error('No stored PDF to send.');
       }
 
-      await this.emailService.sendApplicationEmail(
-        APPLICATION_RECIPIENT,
-        primary.content,
-        primary.filename,
-        rest,
-      );
+      if (!claimed.delivery.partySentAt) {
+        await this.emailService.sendApplicationEmail(
+          APPLICATION_RECIPIENT,
+          primary.content,
+          primary.filename,
+          rest,
+        );
+        await this.applicationModel.updateOne(
+          { _id: id },
+          { $set: { 'delivery.partySentAt': new Date() } },
+        );
+      }
+
+      if (!claimed.delivery.applicantSentAt) {
+        await this.emailService.sendApplicantCopyEmail(claimed.email, [
+          primary,
+          ...rest,
+        ]);
+        await this.applicationModel.updateOne(
+          { _id: id },
+          { $set: { 'delivery.applicantSentAt': new Date() } },
+        );
+      }
 
       await this.applicationModel.updateOne(
         { _id: id },
