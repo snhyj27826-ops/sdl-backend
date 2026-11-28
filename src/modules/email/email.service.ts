@@ -1,12 +1,29 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
-export class EmailService {
+export class EmailService implements OnModuleInit {
+  private readonly logger = new Logger(EmailService.name);
   private transporter?: ReturnType<typeof nodemailer.createTransport>;
 
   constructor(private readonly configService: ConfigService) {}
+
+  // Surfaces SMTP misconfiguration (missing env, blocked port, bad login) at
+  // startup instead of only when an applicant submits. Never blocks startup.
+  async onModuleInit(): Promise<void> {
+    const host = this.configService.get<string>('SMTP_HOST');
+    const port = this.configService.get<string>('SMTP_PORT');
+    try {
+      await this.getTransporter().verify();
+      this.logger.log(`SMTP ready (${host}:${port})`);
+    } catch (error) {
+      const { code, message } = error as { code?: string; message?: string };
+      this.logger.error(
+        `SMTP check failed (${host}:${port}): ${code ?? ''} ${message ?? String(error)}`,
+      );
+    }
+  }
 
   private getTransporter() {
     if (!this.transporter) {

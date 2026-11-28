@@ -136,6 +136,9 @@ export class ApplicationFormService {
           { _id: id },
           { $set: { 'delivery.partySentAt': new Date() } },
         );
+        this.logger.log(
+          `Application ${String(id)} emailed to ${APPLICATION_RECIPIENT}`,
+        );
       }
 
       if (!claimed.delivery.applicantSentAt) {
@@ -147,6 +150,7 @@ export class ApplicationFormService {
           { _id: id },
           { $set: { 'delivery.applicantSentAt': new Date() } },
         );
+        this.logger.log(`Application ${String(id)} emailed to the applicant`);
       }
 
       await this.applicationModel.updateOne(
@@ -159,7 +163,10 @@ export class ApplicationFormService {
 
       return true;
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      const code = (error as { code?: string } | null)?.code;
+      const message =
+        (code ? `${code} ` : '') +
+        (error instanceof Error ? error.message : String(error));
       this.logger.error(
         `Email for application ${String(id)} failed (attempt ${claimed.delivery.attempts}): ${message}`,
       );
